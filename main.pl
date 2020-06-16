@@ -117,14 +117,36 @@ recipes_ingredients([R|Rs], [(Name,Ingredients)|RIs]) :-
     call(O,Name,Ingredients),
     recipes_ingredients(Rs,RIs).
 
+?- recipes_ingredients([risotto],I).
+%@ I = [("Risotto", [("Saffron", 2, "grams", 5, optional),  ("Courgette", 350, "grams", 2, optional),  ("Red pepper", 250, "grams", 2, optional),  ("Onion", 150, "grams", ..., ...),  ("Vegetable stock cube", 20, ..., ...),  ("Risotto rice", ..., ...),  (..., ...)|...])].
+
+?- recipes_ingredients([risotto, shakshouka],I).
+%@ I = [("Risotto", [("Saffron", 2, "grams", 5, optional),  ("Courgette", 350, "grams", 2, optional),  ("Red pepper", 250, "grams", 2, optional),  ("Onion", 150, "grams", ..., ...),  ("Vegetable stock cube", 20, ..., ...),  ("Risotto rice", ..., ...),  (..., ...)|...]),  ("Shakshouka", [("Eggs", 1, "items", 1, required),  ("Green pepper", 250, "grams", 2, required),  ("Onion", 150, "grams", ..., ...),  ("Tomatoes", 350, ..., ...),  ("Feta cheese", ..., ...),  (..., ...)|...])].
+
+
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-List of only required ingredients from a list of ingridients
+List of only required ingredients from a list of ingredients
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 recipe_required([],[]).
 recipe_required([(Name,Qty,Mea,Din,required)|Is],[Name|RIs]) :-
     recipe_required(Is,RIs).
 recipe_required([(Name,Qty,Mea,Din,optional)|Is],RIs) :-
     recipe_required(Is,RIs).
+
+?- recipe_required([
+	    ("Saffron",2,"grams",5,optional),
+	    ("Courgette",350,"grams",2,optional),
+	    ("Red pepper",250,"grams",2,optional),
+	    ("Onion",150,"grams",2,required),
+	    ("Vegetable stock cube",20,"grams",10,optional),
+	    ("Risotto rice",80,"grams",1,required),
+	    ("Cherry tomatoes",120,"grams",2,required),
+	    ("Garlic",10,"grams",3,required),
+	    ("Olive oil",2,"table spoons",2,required),
+	    ("Salt",2,"tea spoons",3,required),
+	    ("Grounded Black pepper",2,"grams",3,optional)
+    ], RequiredIng).
+%@ RequiredIng = ["Onion", "Risotto rice", "Cherry tomatoes", "Garlic", "Olive oil", "Salt"] .
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 List of doable recipies given a list of available ingredients and diners
@@ -133,7 +155,6 @@ doableRecipes([],AIs,D,[]).
 doableRecipes([(RecipeName,Ingredients)|Rs],AvailableIngredients,Diners,[RecipeName|Result]) :-
     recipe_required(Ingredients,RequiredIngredients),
     subset(RequiredIngredients,AvailableIngredients),
-    recipeQs_availableQs(),
     doableRecipes(Rs,AvailableIngredients,Diners,Result).
 doableRecipes([Recipe|Rs],AvailableIngredients,Diners,Result) :-
     doableRecipes(Rs,AvailableIngredients,Diners,Result).
@@ -147,6 +168,5 @@ available_diners_recipes(AvailableIngredients,Diners,Result) :-
     recipes_ingredients(Names,Recipes),
     doableRecipes(Recipes,AvailableIngredients,Diners,Result).
 
-
-
-
+?- available_diners_recipes(["Onion", "Risotto rice", "Cherry tomatoes", "Garlic", "Olive oil", "Salt"],Diners,R).
+%@ R = ["Risotto"] .
